@@ -1041,31 +1041,30 @@ class Vimiv(Gtk.Window):
         pboWidth = self.pixbufOriginal.get_width()
         pboHeight = self.pixbufOriginal.get_height()
 
-        imgRatio = pboWidth / pboHeight
-        scrRatio = self.screensize[0] / self.screensize[1]
-
-
         try:  # If possible scale the image
-            pbfWidth = int(pboWidth * self.zoom_percent)
-            pbfHeight = int(pboHeight * self.zoom_percent)
-
-            print("zoom level: ", self.zoom_percent)
-
             """ In fullscreen, always scale to max width/height,
             (depending on image ratio vs screen ratio), except if user zoomed
             image manually (Note: untested in multi-monitor/multi-screen
             environments """
-            if self.fullscreen and self.user_zoomed == False:
+
+            if self.fullscreen and not self.user_zoomed:
+                imgRatio = pboWidth / pboHeight
+                scrRatio = self.screensize[0] / self.screensize[1]
+
                 if imgRatio > scrRatio:
                     # "panorama/landscape" image: Scale to Height
-                    factor = self.screensize[0] / pbfWidth
+                    factor = self.screensize[0] / pboWidth
                     pbfWidth = self.screensize[0]
-                    pbfHeight = int(pbfHeight * factor)
+                    pbfHeight = int(pboHeight * factor)
                 else:
                     # "portrait" image: Scale to width
-                    factor = self.screensize[1] / pbfHeight
+                    factor = self.screensize[1] / pboHeight
                     pbfHeight = self.screensize[1]
-                    pbfWidth = int(pbfWidth * factor)
+                    pbfWidth = int(pboWidth * factor)
+                self.zoom_percent = pbfHeight / pboHeight;
+            else:
+                pbfWidth = int(pboWidth * self.zoom_percent)
+                pbfHeight = int(pboHeight * self.zoom_percent)
 
             # Rescaling of svg
             ending = self.paths[self.index].split("/")[-1].split(".")[-1]
